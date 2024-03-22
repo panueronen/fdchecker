@@ -1,3 +1,6 @@
-Duplicate hash: f342036274b231f99ae6ef77ccd58ad57284ba255c978ecacc6592be04c94492
-  - E:\test\dsadsa.txt
-  - E:\test\New folder\dsadsa.txt
+E:\test\New folder\skipidi.txt
+E:\test\skipidi.txt
+---
+E:\test\dsadsa.txt
+E:\test\New folder\dsadsa.txt
+---

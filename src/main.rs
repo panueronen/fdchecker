@@ -1,47 +1,41 @@
-use clap::Parser;
-use sha2::{Digest, Sha256};
-use std::collections::HashMap;
+use std::io;
+use std::path::{Path, PathBuf};
 use std::fs::File;
-use std::io::{self, Read, Write};
-use std::path::{PathBuf, Path};
+use std::io::{Read, Write};
+use std::collections::HashMap;
 use walkdir::WalkDir;
+use sha2::{Digest, Sha256};
 
-/// Simple duplicate file checker
-#[derive(Parser, Debug)]
-#[command(version, about="a simple duplicate file checker")]
-struct Args {
-    ///directory to check for duplicates
-    #[arg(short, long)]
-    directory:String,
-    
-    ///print output to a file
-    #[arg(short,long)]
-    textfile:bool,
-}
 fn main() {
-    
-    let args = Args::parse();
+    println!("Enter the directory path to search for duplicate files:");
+    let mut path = String::new();
+    io::stdin().read_line(&mut path).expect("Failed to read line");
+    let path = path.trim();
 
-    let path = args.directory;
+    println!("Would you like to (1) print the duplicates to the console or (2) write them to a file? Enter 1 or 2:");
+    let mut output_choice = String::new();
+    io::stdin().read_line(&mut output_choice).expect("Failed to read line");
+    let output_mode = output_choice.trim();
 
-    let output_mode = if args.textfile {
-        OutputMode::ToFile
-    } else {
-        // Default to print if --to-file is not specified
-        OutputMode::Print
-    };
-
-    match find_duplicates(&path) {
+    match find_duplicates(path) {
         Ok(duplicates) => {
             match output_mode {
-                OutputMode::Print => print_duplicates(&duplicates),
-                OutputMode::ToFile => write_duplicates_to_file(&duplicates, "duplicates.txt").unwrap(),
+                "1" => print_duplicates(&duplicates),
+                "2" => {
+                    let filename = "duplicates.txt";
+                    if let Err(e) = write_duplicates_to_file(&duplicates, filename) {
+                        println!("Failed to write to file: {}", e);
+                    } else {
+                        println!("Duplicates written to {}", filename);
+                    }
+                },
+                _ => println!("Invalid option selected. Please enter 1 or 2 next time."),
             }
-        }
+        },
         Err(e) => println!("Error: {}", e),
     }
-
 }
+
 fn find_duplicates(path: &str) -> io::Result<HashMap<String, Vec<PathBuf>>> {
     let mut file_map: HashMap<String, Vec<PathBuf>> = HashMap::new();
     
@@ -59,6 +53,7 @@ fn find_duplicates(path: &str) -> io::Result<HashMap<String, Vec<PathBuf>>> {
 
     Ok(file_map.into_iter().filter(|(_, v)| v.len() > 1).collect())
 }
+
 fn calculate_file_hash(path: &Path) -> io::Result<String> {
     let mut file = File::open(path)?;
     let mut hasher = Sha256::new();
@@ -75,21 +70,15 @@ fn calculate_file_hash(path: &Path) -> io::Result<String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
-enum OutputMode {
-    Print,
-    ToFile,
-}
-
-
 fn print_duplicates(duplicates: &HashMap<String, Vec<PathBuf>>) {
     if duplicates.is_empty() {
         println!("No duplicates found.");
     } else {
-        for (hash, files) in duplicates {
-            println!("Duplicate hash: {}", hash);
+        for files in duplicates.values() {
             for file in files {
-                println!("  - {}", file.display());
+                println!("{}", file.display());
             }
+            println!("---"); // Separates groups of duplicates
         }
     }
 }
@@ -99,13 +88,12 @@ fn write_duplicates_to_file(duplicates: &HashMap<String, Vec<PathBuf>>, filename
     if duplicates.is_empty() {
         writeln!(file, "No duplicates found.")?;
     } else {
-        for (hash, files) in duplicates {
-            writeln!(file, "Duplicate hash: {}", hash)?;
+        for files in duplicates.values() {
             for file_path in files {
-                writeln!(file, "  - {}", file_path.display())?;
+                writeln!(file, "{}", file_path.display())?;
             }
+            writeln!(file, "---")?; // Separates groups of duplicates
         }
     }
     Ok(())
 }
-
