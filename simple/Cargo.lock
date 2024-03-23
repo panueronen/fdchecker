@@ -141,15 +141,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fdchecker"
-version = "0.1.0"
-dependencies = [
- "clap",
- "sha2",
- "walkdir",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -207,6 +198,15 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
+]
+
+[[package]]
+name = "simple-fdchecker"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "sha2",
+ "walkdir",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [package]
-name = "fdchecker"
+name = "simple-fdchecker"
 version = "0.1.0"
 edition = "2021"
 authors = ["Panu Eronen"]
@@ -8,3 +8,6 @@ authors = ["Panu Eronen"]
 clap = { version = "4.5.3", features = ["derive"] }
 sha2 = "0.10.2"
 walkdir = "2.3.2"
+
+[profile.release]
+opt-level = 3
