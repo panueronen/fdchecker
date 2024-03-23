@@ -2,7 +2,7 @@
 name = "fdchecker"
 version = "0.1.0"
 edition = "2021"
-author = "Panu Eronen"
+authors = ["Panu Eronen"]
 
 [dependencies]
 clap = { version = "4.5.3", features = ["derive"] }
